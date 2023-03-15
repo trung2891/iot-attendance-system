@@ -91,6 +91,7 @@ void StartMode(){
     lcd.setCursor(0, 1);
     lcd.print("Hello ");
     lcd.print(name);
+    countTimeButton = 0;
   }
   while(1){
     if(!digitalRead(SET)){
@@ -258,15 +259,6 @@ void SetModeF(){
   delay(100);
   while(1){
     logOut = 0;
-    while(digitalRead(SET) && digitalRead(ADD) && digitalRead(DEL)) {
-      delay(25);
-      logOut ++;
-      if (logOut > 200) {
-        LogOut();
-        break;
-      }
-    }
-    if (logOut > 200) break;
     if(!digitalRead(SET)){
       delay(100);
       countTimeButton++;
@@ -292,6 +284,7 @@ void SetModeF(){
         lcd.print(listName[id]);
       }
     }
+
     if(!digitalRead(ADD)){
       while (!getFingerprintEnroll(id));
       delay(500);
@@ -299,23 +292,25 @@ void SetModeF(){
     }
     if(!digitalRead(DEL)){
       lcd.clear();
-      lcd.print("Sure to delete");
+      lcd.print("Sure to delete ?");
       lcd.setCursor(0, 1);
-      lcd.print(listID[id] + "-" + listName[id]);
+      lcd.print("                ");
+      lcd.setCursor(0, 1);
+      lcd.print(listID[id] + " " + listName[id]);
       int count = 0;
       while(digitalRead(SET) && digitalRead(ADD)) {
         delay(50);
         count ++;
-        if (count > 40) break;
+        if (count > 100) break;
       }
-      if (count > 40) break;
+      if (count >  100) break;
       if(!digitalRead(SET)) {
-        deleteFingerprint(id);
+        deleteFingerprint(listID[id]);
+        break;
       }
       if(!digitalRead(ADD)) {
         break;
       }
-      delay(1000);
     }
   }
 }
@@ -555,7 +550,7 @@ uint8_t deleteFingerprint(uint8_t id) {
   } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
     Serial.println("Communication error");
   } else if (p == FINGERPRINT_BADLOCATION) {
-    Serial.println("Could not delete in that location");
+
   } else if (p == FINGERPRINT_FLASHERR) {
     Serial.println("Error writing to flash");
   } else {
@@ -563,6 +558,7 @@ uint8_t deleteFingerprint(uint8_t id) {
   }
   lcd.clear();
   lcd.print("Delete success");
+  delay(2000);
   return p;
 }
 
